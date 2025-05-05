@@ -10,10 +10,16 @@ const supabase = createClient(
 );
 let isProcessing = false;
 
-interface SendGridErrorResponse {
-  body: {
-    errors?: { message: string; field?: string; help?: string }[];
+interface SendGridError {
+  response?: {
+    body: {
+      errors?: { message: string; field?: string; help?: string }[];
+    };
   };
+}
+
+function isSendGridError(error: unknown): error is SendGridError {
+  return typeof error === 'object' && error !== null && 'response' in error && typeof (error as any).response.body === 'object';
 }
 
 async function sendEmailWithRetry(options: MailDataRequired, retries = 2): Promise<void> {
@@ -92,8 +98,8 @@ export async function POST(request: Request) {
       });
       console.log('Autoresponder sent to:', email);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error && 'response' in error && (error as any).response?.body
-        ? JSON.stringify((error as any).response.body, null, 2)
+      const errorMessage = isSendGridError(error)
+        ? JSON.stringify(error.response?.body, null, 2)
         : error instanceof Error
         ? error.message
         : String(error);
@@ -126,8 +132,8 @@ export async function POST(request: Request) {
       });
       console.log('Notification sent to: russ@instantask.co');
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error && 'response' in error && (error as any).response?.body
-        ? JSON.stringify((error as any).response.body, null, 2)
+      const errorMessage = isSendGridError(error)
+        ? JSON.stringify(error.response?.body, null, 2)
         : error instanceof Error
         ? error.message
         : String(error);
