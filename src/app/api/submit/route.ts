@@ -2,12 +2,20 @@ import { createClient } from '@supabase/supabase-js';
 import sgMail, { MailDataRequired, ClientResponse } from '@sendgrid/mail';
 import { NextResponse } from 'next/server';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
-const supabase = createClient(
-  process.env.SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || '',
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+const sendGridApiKey = process.env.SENDGRID_API_KEY;
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+if (sendGridApiKey && sendGridApiKey.startsWith('SG.')) {
+  sgMail.setApiKey(sendGridApiKey);
+} else {
+  console.error('SENDGRID_API_KEY is missing or invalid');
+}
+
+const supabase = supabaseUrl && supabaseServiceRoleKey
+  ? createClient(supabaseUrl, supabaseServiceRoleKey, { auth: { autoRefreshToken: false, persistSession: false } })
+  : null;
+
 let isProcessing = false;
 
 interface SendGridError {
@@ -23,6 +31,9 @@ function isSendGridError(error: unknown): error is SendGridError {
 }
 
 async function sendEmailWithRetry(options: MailDataRequired, retries = 2): Promise<void> {
+  if (!sendGridApiKey || !sendGridApiKey.startsWith('SG.')) {
+    throw new Error('SendGrid API key is not configured');
+  }
   for (let i = 0; i <= retries; i++) {
     try {
       const [response]: [ClientResponse, unknown] = await sgMail.send(options);
@@ -57,6 +68,10 @@ export async function POST(request: Request) {
     }
 
     // Insert into Supabase
+    if (!supabase) {
+      console.error('Supabase client is not configured');
+      return NextResponse.json({ error: 'Supabase client is not configured' }, { status: 500 });
+    }
     const { error: dbError } = await supabase
       .from('prospects')
       .insert([{ name, email, phone }]);
