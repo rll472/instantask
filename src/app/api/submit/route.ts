@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import sgMail from '@sendgrid/mail';
+import sgMail, { MailDataRequired, ClientResponse } from '@sendgrid/mail';
 import { NextResponse } from 'next/server';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
@@ -10,13 +10,19 @@ const supabase = createClient(
 );
 let isProcessing = false;
 
-async function sendEmailWithRetry(options: any, retries = 2): Promise<void> {
+interface SendGridErrorResponse {
+  body: {
+    errors?: { message: string; field?: string; help?: string }[];
+  };
+}
+
+async function sendEmailWithRetry(options: MailDataRequired, retries = 2): Promise<void> {
   for (let i = 0; i <= retries; i++) {
     try {
-      const [response] = await sgMail.send(options);
+      const [response]: [ClientResponse, unknown] = await sgMail.send(options);
       console.log('SendGrid response:', JSON.stringify(response, null, 2));
       return;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (i === retries) {
         throw error;
       }
@@ -55,8 +61,8 @@ export async function POST(request: Request) {
     }
     console.log('Prospect saved to Supabase:', { name, email, phone });
 
-    let autoresponderError = null;
-    let notificationError = null;
+    let autoresponderError: string | null = null;
+    let notificationError: string | null = null;
 
     // Send autoresponder
     try {
@@ -85,9 +91,14 @@ export async function POST(request: Request) {
         `,
       });
       console.log('Autoresponder sent to:', email);
-    } catch (error: any) {
-      autoresponderError = error.response ? JSON.stringify(error.response.body, null, 2) : String(error);
-      console.error('Failed to send autoresponder:', autoresponderError);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error && (error as any).response?.body
+        ? JSON.stringify((error as any).response.body, null, 2)
+        : error instanceof Error
+        ? error.message
+        : String(error);
+      autoresponderError = errorMessage;
+      console.error('Failed to send autoresponder:', errorMessage);
     }
 
     // Send notification
@@ -114,9 +125,14 @@ export async function POST(request: Request) {
         `,
       });
       console.log('Notification sent to: russ@instantask.co');
-    } catch (error: any) {
-      notificationError = error.response ? JSON.stringify(error.response.body, null, 2) : String(error);
-      console.error('Failed to send notification:', notificationError);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error && 'response' in error && (error as any).response?.body
+        ? JSON.stringify((error as any).response.body, null, 2)
+        : error instanceof Error
+        ? error.message
+        : String(error);
+      notificationError = errorMessage;
+      console.error('Failed to send notification:', errorMessage);
     }
 
     // Return error if any email failed
