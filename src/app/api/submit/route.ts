@@ -19,7 +19,7 @@ interface SendGridError {
 }
 
 function isSendGridError(error: unknown): error is SendGridError {
-  return typeof error === 'object' && error !== null && 'response' in error && typeof (error as any).response.body === 'object';
+  return typeof error === 'object' && error !== null && 'response' in error && typeof (error as SendGridError).response?.body === 'object';
 }
 
 async function sendEmailWithRetry(options: MailDataRequired, retries = 2): Promise<void> {
