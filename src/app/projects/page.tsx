@@ -80,18 +80,18 @@ export default function Projects() {
                 </div>
                 {/* Use Case 2: Construction Cost Estimator */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
-                  <Image
-                    src="https://images.pexels.com/photos/159306/construction-site-build-construction-work-159306.jpeg"
-                    alt="Construction cost estimator"
-                    width={500}
-                    height={300}
-                    className="rounded-lg mb-4"
-                  />
-                  <h4 className="text-xl font-semibold text-gray-900">Construction Cost Estimator</h4>
-                  <p className="mt-2 text-gray-600">
-                    For a construction firm, we adapted the app into a cost estimation tool. It accepts project details (e.g., square footage, materials) and integrates supplier price data to generate accurate bids. This streamlined the bidding process, replacing hours of manual calculations with instant, reliable estimates.
-                  </p>
-                </div>
+                <Image
+                  src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c"
+                  alt="Content-based affiliate website"
+                  width={500}
+                  height={300}
+                  className="rounded-lg mb-4"
+                />
+                <h4 className="text-xl font-semibold text-gray-900">Content-Based Affiliate Website</h4>
+                <p className="mt-2 text-gray-600">
+                  For an affiliate marketer, we developed a tool to manage a vibrant market-themed website. It automates affiliate link tracking, optimizes content for SEO, and generates performance reports, turning a manual process into a hands-off revenue stream.
+                </p>
+              </div>
                 {/* Use Case 3: AI-Powered Customer Insights Dashboard */}
                 <div className="bg-white p-6 rounded-lg shadow-md">
                   <Image
