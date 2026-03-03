@@ -18,8 +18,8 @@ import { NextResponse } from 'next/server';
          });
          console.log('Billing Portal Session Created:', session.url); // Debug
          return NextResponse.json({ url: session.url });
-       } catch (error: any) {
-         console.error('Update Payment Error:', error.message, error.stack); // Enhanced logging
-         return NextResponse.json({ error: 'Failed to create billing portal session' }, { status: 500 });
-       }
+       } catch (error) {
+        console.error('Update Payment Error:', error);
+        return NextResponse.json({ error: 'Failed to create billing portal session' }, { status: 500 });
+      }
      }

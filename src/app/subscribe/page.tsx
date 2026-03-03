@@ -164,7 +164,7 @@ export default function Subscribe() {
                 {message && <p className="mt-2 text-center text-sm text-gray-600">{message}</p>}
               </form>
               <p className="mt-4 text-center text-sm text-gray-600">
-                You'll be redirected to Stripe to complete payment. Cancel anytime from your portal.
+                You&apos;ll be redirected to Stripe to complete payment. Cancel anytime from your portal.
               </p>
             </div>
           </div>

@@ -40,7 +40,7 @@ export default function Home() {
         throw new Error(data.error || 'Failed to process request');
       }
 
-      setStatus('Success! Your information has been submitted. We\'ll be in touch shortly.');
+      setStatus('Success! Your information has been submitted. We will be in touch shortly.');
       setName('');
       setEmail('');
       setPhone('');
@@ -167,7 +167,7 @@ export default function Home() {
               Ready to Deploy Your First Agent?
             </h3>
             <p className="mt-4 text-lg text-gray-200 text-center max-w-2xl mx-auto">
-              Tell us about your business and we'll reach out to discuss which agents would make the biggest impact.
+              Tell us about your business and we&apos;ll reach out to discuss which agents would make the biggest impact.
             </p>
             <form
               onSubmit={handleSubmit}
