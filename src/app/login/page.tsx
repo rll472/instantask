@@ -2,17 +2,12 @@
 
      import { useState, useEffect } from "react";
      import Head from "next/head";
-     import Link from "next/link";
      import { useRouter } from "next/navigation";
 
      export default function Login() {
        const [formData, setFormData] = useState({ email: "", password: "" });
        const [message, setMessage] = useState("");
        const router = useRouter();
-
-       useEffect(() => {
-         console.log('Login Page Env:', process.env.NEXT_PUBLIC_SUPABASE_URL);
-       }, []); // Debug env loading
 
        const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
          setFormData({ ...formData, [e.target.name]: e.target.value });

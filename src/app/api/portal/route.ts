@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server';
        try {
          const { data, error } = await supabase
            .from('active_clients')
-           .select('name, company_name, email, stripe_customer_id')
+           .select('name, company_name, email, agents_count, stripe_customer_id')
            .eq('auth_token', token)
            .single();
 

@@ -5,6 +5,12 @@ import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
 
+function getPricePerAgent(count: number): number {
+  if (count >= 5) return 199;
+  if (count >= 2) return 249;
+  return 299;
+}
+
 export default function Subscribe() {
   const [formData, setFormData] = useState({
     name: "",
@@ -14,7 +20,11 @@ export default function Subscribe() {
     email: "",
     password: "",
   });
+  const [agentsCount, setAgentsCount] = useState(1);
   const [message, setMessage] = useState("");
+
+  const pricePerAgent = getPricePerAgent(agentsCount);
+  const totalMonthly = pricePerAgent * agentsCount;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -28,13 +38,13 @@ export default function Subscribe() {
       const response = await fetch("/api/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, agentsCount }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        setMessage("Subscription request submitted successfully! Redirecting to payment...");
-        window.location.href = data.url; // Use the URL from the response
+        setMessage("Redirecting to payment...");
+        window.location.href = data.url;
       } else {
         setMessage(`Error: ${data.error}`);
       }
@@ -49,7 +59,7 @@ export default function Subscribe() {
         <title>Instantask - Subscribe</title>
         <meta
           name="description"
-          content="Subscribe to Instantask for $499/month and get unlimited custom digital tools for your small business."
+          content="Deploy your custom AI agents. Simple per-agent pricing starting at $299/month."
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -71,149 +81,101 @@ export default function Subscribe() {
             </Link>
           </div>
           <nav>
-            <Link href="/" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Home
-            </Link>
-            <Link href="/projects" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Projects
-            </Link>
-            <Link href="/pricing" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Pricing
-            </Link>
-            <Link href="/#contact" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Contact
-            </Link>
-            <Link href="/blog" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Blog
-            </Link>
-            <Link href="/portal" className="text-gray-600 hover:text-blue-600 px-3 py-2">
-              Portal
-            </Link>
+            <Link href="/" className="text-gray-600 hover:text-blue-600 px-3 py-2">Home</Link>
+            <Link href="/pricing" className="text-gray-600 hover:text-blue-600 px-3 py-2">Pricing</Link>
+            <Link href="/#contact" className="text-gray-600 hover:text-blue-600 px-3 py-2">Contact</Link>
+            <Link href="/blog" className="text-gray-600 hover:text-blue-600 px-3 py-2">Blog</Link>
+            <Link href="/portal" className="text-gray-600 hover:text-blue-600 px-3 py-2">Portal</Link>
           </nav>
         </div>
       </header>
 
-      {/* Subscription Section */}
       <main>
         <section className="py-16 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-4xl font-extrabold text-gray-900 text-center">
-              Subscribe to Instantask
-            </h2>
+            <h2 className="text-4xl font-extrabold text-gray-900 text-center">Deploy Your Agents</h2>
             <p className="mt-4 text-lg text-gray-600 text-center max-w-2xl mx-auto">
-              Lock in our limited-time offer of $499/month for unlimited custom digital tools. Streamline your business with tailored solutions—no limits, no extra fees.
+              Create your account, choose how many agents you need, and complete payment to get started.
             </p>
 
             <div className="mt-12 max-w-lg mx-auto bg-white p-8 rounded-lg shadow-md">
+              {/* Agent Count Selector */}
+              <div className="mb-8 p-4 bg-blue-50 rounded-lg">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Number of Agents
+                </label>
+                <div className="flex items-center gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setAgentsCount(Math.max(1, agentsCount - 1))}
+                    className="w-10 h-10 rounded-full bg-white border border-gray-300 text-lg font-bold hover:bg-gray-100 transition"
+                  >
+                    −
+                  </button>
+                  <span className="text-3xl font-extrabold text-gray-900 w-8 text-center">{agentsCount}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAgentsCount(agentsCount + 1)}
+                    className="w-10 h-10 rounded-full bg-white border border-gray-300 text-lg font-bold hover:bg-gray-100 transition"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="mt-3 flex justify-between text-sm">
+                  <span className="text-gray-600">${pricePerAgent}/agent/month</span>
+                  <span className="font-semibold text-blue-600">${totalMonthly}/month total</span>
+                </div>
+                {agentsCount >= 2 && agentsCount < 5 && (
+                  <p className="mt-1 text-xs text-green-600">2–4 agent discount applied — saving ${(299 - pricePerAgent) * agentsCount}/month</p>
+                )}
+                {agentsCount >= 5 && (
+                  <p className="mt-1 text-xs text-green-600">5+ agent discount applied — saving ${(299 - pricePerAgent) * agentsCount}/month</p>
+                )}
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                    Company Name
-                  </label>
-                  <input
-                    type="text"
-                    id="companyName"
-                    name="companyName"
-                    value={formData.companyName}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address
-                  </label>
-                  <input
-                    type="text"
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                {[
+                  { id: 'name', label: 'Name', type: 'text' },
+                  { id: 'companyName', label: 'Company Name', type: 'text' },
+                  { id: 'address', label: 'Address', type: 'text' },
+                  { id: 'phone', label: 'Phone Number', type: 'tel' },
+                  { id: 'email', label: 'Email Address', type: 'email' },
+                  { id: 'password', label: 'Password', type: 'password' },
+                ].map(({ id, label, type }) => (
+                  <div key={id}>
+                    <label htmlFor={id} className="block text-sm font-medium text-gray-700">{label}</label>
+                    <input
+                      type={type}
+                      id={id}
+                      name={id}
+                      value={formData[id as keyof typeof formData]}
+                      onChange={handleChange}
+                      required
+                      className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                ))}
                 <button
                   type="submit"
                   className="w-full bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 transition"
                 >
-                  Subscribe Now
+                  Subscribe — ${totalMonthly}/month
                 </button>
                 {message && <p className="mt-2 text-center text-sm text-gray-600">{message}</p>}
               </form>
               <p className="mt-4 text-center text-sm text-gray-600">
-                After submission, you’ll be redirected to complete your $499/month payment with Stripe. This special offer is limited—act now!
+                You'll be redirected to Stripe to complete payment. Cancel anytime from your portal.
               </p>
             </div>
           </div>
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>© 2025 Instantask. All rights reserved.</p>
+          <p>© 2026 Instantask. All rights reserved.</p>
           <p className="mt-2">
-            <a href="mailto:russ@instantask.co" className="hover:text-blue-400">
-              russ@instantask.co
-            </a>
+            <a href="mailto:russ@instantask.co" className="hover:text-blue-400">russ@instantask.co</a>
           </p>
         </div>
       </footer>
